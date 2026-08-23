@@ -3,6 +3,8 @@ import sqlite3
 
 from app.schemas.transaction import Transaction
 
+from fastapi.middleware.cors import CORSMiddleware
+
 from app.services.ml_service import MLService
 from app.services.risk_engine import RiskEngine
 from app.services.feature_service import FeatureService
@@ -20,6 +22,17 @@ app = FastAPI(
     title="AI Payment Risk Manager",
     description="AI-powered payment risk assessment system",
     version="0.4.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -163,32 +176,46 @@ def assess_transaction(
     # =========================================
 
     save_risk_assessment(
+    transaction_id=transaction.transaction_id,
 
-        transaction_id=transaction.transaction_id,
+    ml_probability=risk_result[
+        "ml_probability"
+    ],
 
-        ml_probability=risk_result[
-            "ml_probability"
-        ],
+    velocity_risk=risk_result[
+        "velocity_risk"
+    ],
 
-        velocity_risk=risk_result[
-            "velocity_risk"
-        ],
+    risk_probability=risk_result[
+        "risk_probability"
+    ],
 
-        risk_probability=risk_result[
-            "risk_probability"
-        ],
+    risk_level=risk_result[
+        "risk_level"
+    ],
 
-        risk_level=risk_result[
-            "risk_level"
-        ],
+    decision=risk_result[
+        "decision"
+    ],
 
-        decision=risk_result[
-            "decision"
-        ],
+    risk_reasons=risk_result[
+        "risk_reasons"
+    ],
 
-        risk_reasons=risk_result[
-            "risk_reasons"
-        ]
+    transactions_last_5min=transactions_last_5min,
+
+    transactions_last_1h=transactions_last_1h,
+
+    amount_last_1h=amount_last_1h,
+
+    device_transactions_last_5min=
+        device_transactions_last_5min,
+
+    device_transactions_last_1h=
+        device_transactions_last_1h,
+
+    unique_customers_last_1h=
+        unique_customers_last_1h
     )
 
     # =========================================
