@@ -9,14 +9,17 @@ from app.services.feature_service import FeatureService
 
 from app.database.database import (
     initialize_database,
-    save_transaction
+    save_transaction,
+    save_risk_assessment,
+    get_transaction,
+    get_all_transactions
 )
 
 
 app = FastAPI(
     title="AI Payment Risk Manager",
     description="AI-powered payment risk assessment system",
-    version="0.3.0"
+    version="0.4.0"
 )
 
 
@@ -39,6 +42,10 @@ def root():
     }
 
 
+# =====================================================
+# TRANSACTION RISK ASSESSMENT
+# =====================================================
+
 @app.post("/transaction")
 def assess_transaction(
     transaction: Transaction
@@ -47,7 +54,7 @@ def assess_transaction(
     transaction_data = transaction.model_dump()
 
     # =========================================
-    # REAL-TIME CUSTOMER FEATURES
+    # CUSTOMER FEATURES
     # =========================================
 
     transactions_last_5min = (
@@ -72,7 +79,7 @@ def assess_transaction(
     )
 
     # =========================================
-    # REAL-TIME DEVICE FEATURES
+    # DEVICE FEATURES
     # =========================================
 
     device_transactions_last_5min = (
@@ -97,7 +104,7 @@ def assess_transaction(
     )
 
     # =========================================
-    # ML FRAUD PREDICTION
+    # ML PREDICTION
     # =========================================
 
     fraud_probability = (
@@ -152,7 +159,40 @@ def assess_transaction(
         )
 
     # =========================================
-    # FINAL RESPONSE
+    # SAVE RISK ASSESSMENT
+    # =========================================
+
+    save_risk_assessment(
+
+        transaction_id=transaction.transaction_id,
+
+        ml_probability=risk_result[
+            "ml_probability"
+        ],
+
+        velocity_risk=risk_result[
+            "velocity_risk"
+        ],
+
+        risk_probability=risk_result[
+            "risk_probability"
+        ],
+
+        risk_level=risk_result[
+            "risk_level"
+        ],
+
+        decision=risk_result[
+            "decision"
+        ],
+
+        risk_reasons=risk_result[
+            "risk_reasons"
+        ]
+    )
+
+    # =========================================
+    # RESPONSE
     # =========================================
 
     return {
@@ -185,4 +225,53 @@ def assess_transaction(
             unique_customers_last_1h,
 
         **risk_result
+    }
+
+
+# =====================================================
+# TRANSACTION INVESTIGATION
+# =====================================================
+
+@app.get("/transaction/{transaction_id}")
+def investigate_transaction(
+    transaction_id: str
+):
+
+    transaction = get_transaction(
+        transaction_id
+    )
+
+    if transaction is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Transaction not found"
+        )
+
+    return transaction
+
+
+# =====================================================
+# TRANSACTION HISTORY
+# =====================================================
+
+@app.get("/transactions")
+def list_transactions(
+    limit: int = 50
+):
+
+    if limit < 1 or limit > 100:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Limit must be between 1 and 100"
+        )
+
+    transactions = get_all_transactions(
+        limit
+    )
+
+    return {
+        "count": len(transactions),
+        "transactions": transactions
     }
