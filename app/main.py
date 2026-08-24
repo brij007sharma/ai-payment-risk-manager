@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException
 import sqlite3
 
+
+from app.services.ai_investigator import AIInvestigator
 from app.schemas.transaction import Transaction
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,6 +40,7 @@ app.add_middleware(
 
 ml_service = MLService()
 risk_engine = RiskEngine()
+ai_investigator = AIInvestigator()
 feature_service = FeatureService()
 
 
@@ -331,4 +334,59 @@ def list_transactions(
     return {
         "count": len(transactions),
         "transactions": transactions
+    }
+
+@app.post("/investigate/{transaction_id}")
+def investigate_transaction(
+    transaction_id: str
+):
+
+    transaction = get_transaction(
+        transaction_id
+    )
+
+    if transaction is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Transaction not found"
+        )
+
+    if transaction.get("decision") is None:
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Transaction has not been "
+                "risk-assessed yet."
+            )
+        )
+
+    investigation = (
+        ai_investigator.investigate(
+            transaction
+        )
+    )
+
+    return {
+        "transaction_id":
+            transaction_id,
+
+        "decision":
+            transaction.get(
+                "decision"
+            ),
+
+        "risk_level":
+            transaction.get(
+                "risk_level"
+            ),
+
+        "risk_probability":
+            transaction.get(
+                "risk_probability"
+            ),
+
+        "investigation":
+            investigation
     }

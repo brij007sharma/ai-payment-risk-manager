@@ -33,6 +33,15 @@ function App() {
 
   const [error, setError] = useState("");
 
+  const [aiInvestigation, setAiInvestigation] =
+  useState(null);
+
+  const [aiLoading, setAiLoading] =
+    useState(false);
+
+  const [aiError, setAiError] =
+    useState("");
+
   // =========================================
   // FILTERS
   // =========================================
@@ -49,9 +58,64 @@ function App() {
     useState("latest");
 
 
+    useEffect(() => {
+  // Clear previous AI investigation
+  // whenever a different transaction is opened.
+  setAiInvestigation(null);
+  setAiError("");
+  setAiLoading(false);
+}, [selectedTransaction]);
+
   // =========================================
   // FETCH TRANSACTIONS
   // =========================================
+
+  const runAIInvestigation = async (
+  transactionId
+) => {
+
+  try {
+
+    setAiLoading(true);
+
+    setAiError("");
+
+    setAiInvestigation(null);
+
+    const response = await fetch(
+      `${API_URL}/investigate/${transactionId}`,
+      {
+        method: "POST",
+      }
+    );
+
+    if (!response.ok) {
+
+      throw new Error(
+        "AI investigation failed"
+      );
+
+    }
+
+    const data =
+      await response.json();
+
+    setAiInvestigation(
+      data.investigation
+    );
+
+  } catch (error) {
+
+    setAiError(
+      "Unable to generate AI investigation."
+    );
+
+  } finally {
+
+    setAiLoading(false);
+
+  }
+};
 
   const fetchTransactions = async () => {
 
@@ -1570,6 +1634,200 @@ function App() {
 
                   )
               }
+
+            </div>
+
+            <div className="ai-investigator">
+
+              <div className="ai-investigator-header">
+
+                <div>
+
+                  <span className="eyebrow">
+                    AI Investigator
+                  </span>
+
+                  <h3>
+                    Analyst Investigation
+                  </h3>
+
+                  <p>
+                    AI-generated explanation based on
+                    verified risk evidence.
+                  </p>
+
+                </div>
+
+                <button
+                  className="ai-button"
+                  onClick={() =>
+                    runAIInvestigation(
+                      selectedTransaction.transaction_id
+                    )
+                  }
+                  disabled={aiLoading}
+                >
+
+                  {aiLoading
+                    ? "Investigating..."
+                    : "Run AI Investigation"}
+
+                </button>
+
+              </div>
+
+
+              {aiError && (
+
+                <div className="ai-error">
+                  {aiError}
+                </div>
+
+              )}
+
+
+              {aiInvestigation && (
+
+                <div className="ai-result">
+
+                  <div className="ai-summary">
+
+                    <span>
+                      Investigation Summary
+                    </span>
+
+                    <p>
+                      {
+                        aiInvestigation.summary
+                      }
+                    </p>
+
+                  </div>
+
+
+                  <div className="ai-primary-risk">
+
+                    <span>
+                      Primary Risk
+                    </span>
+
+                    <strong>
+                      {
+                        aiInvestigation.primary_risk
+                      }
+                    </strong>
+
+                  </div>
+
+
+                  <div className="ai-columns">
+
+                    <div>
+
+                      <h4>
+                        Risk Factors
+                      </h4>
+
+                      <ul>
+
+                        {
+                          aiInvestigation.risk_factors
+                            ?.map(
+                              (factor, index) => (
+
+                                <li key={index}>
+                                  {factor}
+                                </li>
+
+                              )
+                            )
+                        }
+
+                      </ul>
+
+                    </div>
+
+
+                    <div>
+
+                      <h4>
+                        Evidence
+                      </h4>
+
+                      <ul>
+
+                        {
+                          aiInvestigation.evidence
+                            ?.map(
+                              (item, index) => (
+
+                                <li key={index}>
+                                  {item}
+                                </li>
+
+                              )
+                            )
+                        }
+
+                      </ul>
+
+                    </div>
+
+                  </div>
+
+
+                  <div className="ai-footer">
+
+                    <div>
+
+                      <span>
+                        Confidence
+                      </span>
+
+                      <strong>
+                        {
+                          aiInvestigation.confidence
+                        }
+                      </strong>
+
+                    </div>
+
+
+                    <div>
+
+                      <span>
+                        Recommended Action
+                      </span>
+
+                      <strong>
+                        {
+                          aiInvestigation
+                            .recommended_action
+                        }
+                      </strong>
+
+                    </div>
+
+                  </div>
+
+
+                  <div className="analyst-note">
+
+                    <strong>
+                      Analyst Note
+                    </strong>
+
+                    <p>
+                      {
+                        aiInvestigation.analyst_note
+                      }
+                    </p>
+
+                  </div>
+
+                </div>
+
+              )}
 
             </div>
 
