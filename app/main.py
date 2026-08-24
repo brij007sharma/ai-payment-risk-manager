@@ -132,20 +132,50 @@ def assess_transaction(
 
     risk_result = risk_engine.assess_risk(
 
-        fraud_probability,
+    fraud_probability=fraud_probability,
 
+    transactions_last_5min=
         transactions_last_5min,
 
+    transactions_last_1h=
         transactions_last_1h,
 
+    amount_last_1h=
         amount_last_1h,
 
+    device_transactions_last_5min=
         device_transactions_last_5min,
 
+    device_transactions_last_1h=
         device_transactions_last_1h,
 
-        unique_customers_last_1h
-    )
+    unique_customers_last_1h=
+        unique_customers_last_1h,
+
+    amount=
+        transaction.amount,
+
+    merchant_risk_score=
+        transaction.merchant_risk_score,
+
+    device_risk_score=
+        transaction.device_risk_score,
+
+    ip_risk_score=
+        transaction.ip_risk_score,
+
+    is_international=
+        transaction.is_international,
+
+    is_new_device=
+        transaction.is_new_device,
+
+    is_new_location=
+        transaction.is_new_location,
+
+    hour=
+        transaction.hour
+)
 
     # =========================================
     # SAVE TRANSACTION

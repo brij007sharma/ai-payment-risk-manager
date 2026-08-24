@@ -1,10 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+
 import {
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
   Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
 } from "recharts";
 
 import "./App.css";
@@ -16,12 +22,36 @@ const API_URL = "http://127.0.0.1:8000";
 function App() {
 
   const [transactions, setTransactions] = useState([]);
-  const [selectedTransaction, setSelectedTransaction] = useState(null);
+
+  const [selectedTransaction, setSelectedTransaction] =
+    useState(null);
 
   const [loading, setLoading] = useState(true);
-  const [investigating, setInvestigating] = useState(false);
+
+  const [investigating, setInvestigating] =
+    useState(false);
+
   const [error, setError] = useState("");
 
+  // =========================================
+  // FILTERS
+  // =========================================
+
+  const [search, setSearch] = useState("");
+
+  const [decisionFilter, setDecisionFilter] =
+    useState("ALL");
+
+  const [riskFilter, setRiskFilter] =
+    useState("ALL");
+
+  const [sortBy, setSortBy] =
+    useState("latest");
+
+
+  // =========================================
+  // FETCH TRANSACTIONS
+  // =========================================
 
   const fetchTransactions = async () => {
 
@@ -34,12 +64,18 @@ function App() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch transactions");
+
+        throw new Error(
+          "Failed to fetch transactions"
+        );
+
       }
 
       const data = await response.json();
 
-      setTransactions(data.transactions || []);
+      setTransactions(
+        data.transactions || []
+      );
 
     } catch (err) {
 
@@ -55,6 +91,10 @@ function App() {
   };
 
 
+  // =========================================
+  // INVESTIGATE TRANSACTION
+  // =========================================
+
   const investigateTransaction = async (
     transactionId
   ) => {
@@ -68,7 +108,11 @@ function App() {
       );
 
       if (!response.ok) {
-        throw new Error("Transaction not found");
+
+        throw new Error(
+          "Transaction not found"
+        );
+
       }
 
       const data = await response.json();
@@ -89,6 +133,10 @@ function App() {
   };
 
 
+  // =========================================
+  // AUTO REFRESH
+  // =========================================
+
   useEffect(() => {
 
     fetchTransactions();
@@ -102,6 +150,10 @@ function App() {
 
   }, []);
 
+
+  // =========================================
+  // STATISTICS
+  // =========================================
 
   const statistics = useMemo(() => {
 
@@ -122,6 +174,11 @@ function App() {
         transaction.decision === "BLOCK"
     ).length;
 
+    const highRisk = transactions.filter(
+      (transaction) =>
+        transaction.risk_level === "HIGH"
+    ).length;
+
     const scoredTransactions =
       transactions.filter(
         (transaction) =>
@@ -132,9 +189,16 @@ function App() {
       scoredTransactions.length > 0
         ? scoredTransactions.reduce(
             (sum, transaction) =>
-              sum + transaction.risk_probability,
+              sum +
+              transaction.risk_probability,
             0
-          ) / scoredTransactions.length
+          ) /
+          scoredTransactions.length
+        : 0;
+
+    const reviewRate =
+      total > 0
+        ? review / total
         : 0;
 
     return {
@@ -142,39 +206,213 @@ function App() {
       approved,
       review,
       blocked,
+      highRisk,
       averageRisk,
+      reviewRate,
     };
 
   }, [transactions]);
 
 
-  const chartData = [
+  // =========================================
+  // FILTER + SORT
+  // =========================================
+
+  const filteredTransactions = useMemo(() => {
+
+    let result = [...transactions];
+
+    // Search
+    if (search.trim()) {
+
+      const query =
+        search.toLowerCase().trim();
+
+      result = result.filter(
+        (transaction) =>
+          transaction.transaction_id
+            ?.toLowerCase()
+            .includes(query) ||
+
+          transaction.customer_id
+            ?.toLowerCase()
+            .includes(query) ||
+
+          transaction.device_id
+            ?.toLowerCase()
+            .includes(query)
+      );
+
+    }
+
+
+    // Decision filter
+    if (decisionFilter !== "ALL") {
+
+      result = result.filter(
+        (transaction) =>
+          transaction.decision ===
+          decisionFilter
+      );
+
+    }
+
+
+    // Risk filter
+    if (riskFilter !== "ALL") {
+
+      result = result.filter(
+        (transaction) =>
+          transaction.risk_level ===
+          riskFilter
+      );
+
+    }
+
+
+    // Sorting
+    if (sortBy === "risk-high") {
+
+      result.sort(
+        (a, b) =>
+          (b.risk_probability || 0) -
+          (a.risk_probability || 0)
+      );
+
+    } else if (sortBy === "risk-low") {
+
+      result.sort(
+        (a, b) =>
+          (a.risk_probability || 0) -
+          (b.risk_probability || 0)
+      );
+
+    } else if (sortBy === "amount-high") {
+
+      result.sort(
+        (a, b) =>
+          Number(b.amount || 0) -
+          Number(a.amount || 0)
+      );
+
+    } else {
+
+      result.sort(
+        (a, b) =>
+          new Date(b.timestamp) -
+          new Date(a.timestamp)
+      );
+
+    }
+
+    return result;
+
+  }, [
+    transactions,
+    search,
+    decisionFilter,
+    riskFilter,
+    sortBy,
+  ]);
+
+
+  // =========================================
+  // PIE CHART DATA
+  // =========================================
+
+  const decisionChartData = [
+
     {
       name: "Approved",
       value: statistics.approved,
     },
+
     {
       name: "Review",
       value: statistics.review,
     },
+
     {
       name: "Blocked",
       value: statistics.blocked,
     },
+
   ];
 
+
+  // =========================================
+  // RISK LEVEL DATA
+  // =========================================
+
+  const riskChartData = [
+
+    {
+      name: "Low",
+      value: transactions.filter(
+        (transaction) =>
+          transaction.risk_level === "LOW"
+      ).length,
+    },
+
+    {
+      name: "Medium",
+      value: transactions.filter(
+        (transaction) =>
+          transaction.risk_level === "MEDIUM"
+      ).length,
+    },
+
+    {
+      name: "High",
+      value: statistics.highRisk,
+    },
+
+  ];
+
+
+  // =========================================
+  // HIGH-RISK TRANSACTIONS
+  // =========================================
+
+  const highRiskTransactions = useMemo(() => {
+
+    return [...transactions]
+
+      .filter(
+        (transaction) =>
+          transaction.risk_probability !== null
+      )
+
+      .sort(
+        (a, b) =>
+          (b.risk_probability || 0) -
+          (a.risk_probability || 0)
+      )
+
+      .slice(0, 5);
+
+  }, [transactions]);
+
+
+  // =========================================
+  // RENDER
+  // =========================================
 
   return (
 
     <div className="app">
 
-      {/* ================= HEADER ================= */}
+      {/* =====================================
+          HEADER
+      ===================================== */}
 
       <header className="header">
 
         <div>
 
-          <h1>AI Payment Risk Manager</h1>
+          <h1>
+            AI Payment Risk Manager
+          </h1>
 
           <p>
             Real-time payment fraud monitoring
@@ -193,15 +431,21 @@ function App() {
       </header>
 
 
-      {/* ================= ERROR ================= */}
+      {/* =====================================
+          ERROR
+      ===================================== */}
 
       {error && (
 
         <div className="error">
 
-          {error}
+          <span>
+            {error}
+          </span>
 
-          <button onClick={fetchTransactions}>
+          <button
+            onClick={fetchTransactions}
+          >
             Retry
           </button>
 
@@ -210,7 +454,9 @@ function App() {
       )}
 
 
-      {/* ================= STATS ================= */}
+      {/* =====================================
+          KPI CARDS
+      ===================================== */}
 
       <section className="stats-grid">
 
@@ -266,6 +512,19 @@ function App() {
         </div>
 
 
+        <div className="stat-card high-risk">
+
+          <span className="stat-label">
+            High Risk
+          </span>
+
+          <strong>
+            {statistics.highRisk}
+          </strong>
+
+        </div>
+
+
         <div className="stat-card">
 
           <span className="stat-label">
@@ -273,7 +532,9 @@ function App() {
           </span>
 
           <strong>
-            {(statistics.averageRisk * 100).toFixed(1)}%
+            {(statistics.averageRisk * 100)
+              .toFixed(1)}
+            %
           </strong>
 
         </div>
@@ -281,176 +542,26 @@ function App() {
       </section>
 
 
-      {/* ================= MAIN ================= */}
+      {/* =====================================
+          ANALYTICS
+      ===================================== */}
 
-      <main className="main-grid">
+      <section className="analytics-grid">
 
+        {/* DECISION DISTRIBUTION */}
 
-        {/* ================= TRANSACTION TABLE ================= */}
-
-        <section className="panel transactions-panel">
-
-          <div className="panel-header">
-
-            <div>
-
-              <h2>Recent Transactions</h2>
-
-              <p>
-                Live payment-risk activity
-              </p>
-
-            </div>
-
-            <button
-              className="refresh-button"
-              onClick={fetchTransactions}
-            >
-              Refresh
-            </button>
-
-          </div>
-
-
-          {loading ? (
-
-            <div className="loading">
-              Loading transactions...
-            </div>
-
-          ) : transactions.length === 0 ? (
-
-            <div className="empty">
-              No transactions found.
-            </div>
-
-          ) : (
-
-            <div className="table-container">
-
-              <table>
-
-                <thead>
-
-                  <tr>
-
-                    <th>Transaction</th>
-                    <th>Customer</th>
-                    <th>Amount</th>
-                    <th>Risk</th>
-                    <th>Decision</th>
-                    <th></th>
-
-                  </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                  {transactions.map(
-                    (transaction) => (
-
-                      <tr
-                        key={
-                          transaction.transaction_id
-                        }
-                      >
-
-                        <td className="transaction-id">
-
-                          {transaction.transaction_id}
-
-                        </td>
-
-
-                        <td>
-                          {transaction.customer_id}
-                        </td>
-
-
-                        <td>
-                          ₹
-                          {Number(
-                            transaction.amount
-                          ).toLocaleString("en-IN")}
-                        </td>
-
-
-                        <td>
-
-                          {transaction.risk_probability !==
-                          null
-                            ? `${(
-                                transaction.risk_probability *
-                                100
-                              ).toFixed(1)}%`
-                            : "—"}
-
-                        </td>
-
-
-                        <td>
-
-                          <span
-                            className={`badge ${
-                              transaction.decision
-                                ?.toLowerCase() ||
-                              "unknown"
-                            }`}
-                          >
-
-                            {transaction.decision ||
-                              "N/A"}
-
-                          </span>
-
-                        </td>
-
-
-                        <td>
-
-                          <button
-                            className="investigate-button"
-                            onClick={() =>
-                              investigateTransaction(
-                                transaction.transaction_id
-                              )
-                            }
-                          >
-                            Investigate
-                          </button>
-
-                        </td>
-
-                      </tr>
-
-                    )
-                  )}
-
-                </tbody>
-
-              </table>
-
-            </div>
-
-          )}
-
-        </section>
-
-
-        {/* ================= CHART ================= */}
-
-        <section className="panel chart-panel">
+        <div className="panel analytics-panel">
 
           <div className="panel-header">
 
             <div>
 
-              <h2>Risk Distribution</h2>
+              <h2>
+                Decision Distribution
+              </h2>
 
               <p>
-                Current transaction decisions
+                Payment decision breakdown
               </p>
 
             </div>
@@ -468,7 +579,7 @@ function App() {
               <PieChart>
 
                 <Pie
-                  data={chartData}
+                  data={decisionChartData}
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
@@ -477,9 +588,13 @@ function App() {
                   innerRadius={55}
                   paddingAngle={4}
                 >
+
                   <Cell fill="#12b76a" />
+
                   <Cell fill="#f79009" />
+
                   <Cell fill="#f04438" />
+
                 </Pie>
 
                 <Tooltip />
@@ -494,28 +609,546 @@ function App() {
           <div className="legend">
 
             <div>
+
               <span className="legend-dot approved-dot"></span>
+
               Approved
+
             </div>
 
             <div>
+
               <span className="legend-dot review-dot"></span>
+
               Review
+
             </div>
 
             <div>
+
               <span className="legend-dot blocked-dot"></span>
+
               Blocked
+
             </div>
 
           </div>
 
-        </section>
-
-      </main>
+        </div>
 
 
-      {/* ================= INVESTIGATION ================= */}
+        {/* RISK LEVEL */}
+
+        <div className="panel analytics-panel">
+
+          <div className="panel-header">
+
+            <div>
+
+              <h2>
+                Risk Levels
+              </h2>
+
+              <p>
+                Risk score classification
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div className="bar-chart">
+
+            <ResponsiveContainer
+              width="100%"
+              height={290}
+            >
+
+              <BarChart
+                data={riskChartData}
+              >
+
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                />
+
+                <XAxis
+                  dataKey="name"
+                />
+
+                <YAxis
+                  allowDecimals={false}
+                />
+
+                <Tooltip />
+
+                <Bar
+                  dataKey="value"
+                  fill="#475467"
+                  radius={[6, 6, 0, 0]}
+                />
+
+              </BarChart>
+
+            </ResponsiveContainer>
+
+          </div>
+
+        </div>
+
+
+        {/* HIGH RISK */}
+
+        <div className="panel high-risk-panel">
+
+          <div className="panel-header">
+
+            <div>
+
+              <h2>
+                Highest Risk Transactions
+              </h2>
+
+              <p>
+                Transactions requiring attention
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div className="high-risk-list">
+
+            {highRiskTransactions.length === 0 ? (
+
+              <div className="empty-small">
+
+                No scored transactions.
+
+              </div>
+
+            ) : (
+
+              highRiskTransactions.map(
+                (transaction) => (
+
+                  <div
+                    className="high-risk-item"
+                    key={
+                      transaction.transaction_id
+                    }
+                  >
+
+                    <div>
+
+                      <strong>
+                        {
+                          transaction.transaction_id
+                        }
+                      </strong>
+
+                      <span>
+                        {
+                          transaction.customer_id
+                        }
+                      </span>
+
+                    </div>
+
+
+                    <div className="high-risk-score">
+
+                      <strong>
+                        {(
+                          transaction.risk_probability *
+                          100
+                        ).toFixed(1)}
+                        %
+                      </strong>
+
+                      <span
+                        className={`badge ${
+                          transaction.decision
+                            ?.toLowerCase()
+                        }`}
+                      >
+                        {
+                          transaction.decision ||
+                          "N/A"
+                        }
+                      </span>
+
+                    </div>
+
+
+                    <button
+                      className="investigate-button"
+                      onClick={() =>
+                        investigateTransaction(
+                          transaction.transaction_id
+                        )
+                      }
+                    >
+                      View
+                    </button>
+
+                  </div>
+
+                )
+              )
+
+            )}
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* =====================================
+          TRANSACTION OPERATIONS
+      ===================================== */}
+
+      <section className="panel transactions-panel">
+
+        <div className="panel-header">
+
+          <div>
+
+            <h2>
+              Transaction Monitoring
+            </h2>
+
+            <p>
+              Search, filter and investigate payment activity
+            </p>
+
+          </div>
+
+
+          <button
+            className="refresh-button"
+            onClick={fetchTransactions}
+          >
+            Refresh
+          </button>
+
+        </div>
+
+
+        {/* FILTER BAR */}
+
+        <div className="filter-bar">
+
+          <input
+            type="text"
+            placeholder="Search transaction, customer or device..."
+            value={search}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
+          />
+
+
+          <select
+            value={decisionFilter}
+            onChange={(event) =>
+              setDecisionFilter(
+                event.target.value
+              )
+            }
+          >
+
+            <option value="ALL">
+              All decisions
+            </option>
+
+            <option value="APPROVE">
+              Approved
+            </option>
+
+            <option value="REVIEW">
+              Review
+            </option>
+
+            <option value="BLOCK">
+              Blocked
+            </option>
+
+          </select>
+
+
+          <select
+            value={riskFilter}
+            onChange={(event) =>
+              setRiskFilter(
+                event.target.value
+              )
+            }
+          >
+
+            <option value="ALL">
+              All risk levels
+            </option>
+
+            <option value="LOW">
+              Low risk
+            </option>
+
+            <option value="MEDIUM">
+              Medium risk
+            </option>
+
+            <option value="HIGH">
+              High risk
+            </option>
+
+          </select>
+
+
+          <select
+            value={sortBy}
+            onChange={(event) =>
+              setSortBy(
+                event.target.value
+              )
+            }
+          >
+
+            <option value="latest">
+              Latest
+            </option>
+
+            <option value="risk-high">
+              Highest risk
+            </option>
+
+            <option value="risk-low">
+              Lowest risk
+            </option>
+
+            <option value="amount-high">
+              Highest amount
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div className="results-count">
+
+          Showing{" "}
+          <strong>
+            {filteredTransactions.length}
+          </strong>{" "}
+          of{" "}
+          <strong>
+            {transactions.length}
+          </strong>{" "}
+          transactions
+
+        </div>
+
+
+        {/* TABLE */}
+
+        {loading ? (
+
+          <div className="loading">
+            Loading transactions...
+          </div>
+
+        ) : filteredTransactions.length === 0 ? (
+
+          <div className="empty">
+            No transactions match the current filters.
+          </div>
+
+        ) : (
+
+          <div className="table-container">
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Transaction
+                  </th>
+
+                  <th>
+                    Customer
+                  </th>
+
+                  <th>
+                    Device
+                  </th>
+
+                  <th>
+                    Amount
+                  </th>
+
+                  <th>
+                    Risk
+                  </th>
+
+                  <th>
+                    Level
+                  </th>
+
+                  <th>
+                    Decision
+                  </th>
+
+                  <th></th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                {filteredTransactions.map(
+                  (transaction) => (
+
+                    <tr
+                      key={
+                        transaction.transaction_id
+                      }
+                    >
+
+                      <td className="transaction-id">
+
+                        {
+                          transaction.transaction_id
+                        }
+
+                      </td>
+
+
+                      <td>
+                        {
+                          transaction.customer_id
+                        }
+                      </td>
+
+
+                      <td>
+                        {
+                          transaction.device_id
+                        }
+                      </td>
+
+
+                      <td>
+
+                        ₹
+                        {Number(
+                          transaction.amount
+                        ).toLocaleString(
+                          "en-IN"
+                        )}
+
+                      </td>
+
+
+                      <td>
+
+                        {transaction.risk_probability !==
+                        null
+
+                          ? `${(
+                              transaction.risk_probability *
+                              100
+                            ).toFixed(1)}%`
+
+                          : "—"}
+
+                      </td>
+
+
+                      <td>
+
+                        {transaction.risk_level ? (
+
+                          <span
+                            className={`risk-level ${
+                              transaction.risk_level.toLowerCase()
+                            }`}
+                          >
+                            {
+                              transaction.risk_level
+                            }
+                          </span>
+
+                        ) : (
+                          "—"
+                        )}
+
+                      </td>
+
+
+                      <td>
+
+                        <span
+                          className={`badge ${
+                            transaction.decision
+                              ?.toLowerCase() ||
+                            "unknown"
+                          }`}
+                        >
+
+                          {
+                            transaction.decision ||
+                            "N/A"
+                          }
+
+                        </span>
+
+                      </td>
+
+
+                      <td>
+
+                        <button
+                          className="investigate-button"
+                          onClick={() =>
+                            investigateTransaction(
+                              transaction.transaction_id
+                            )
+                          }
+                        >
+                          Investigate
+                        </button>
+
+                      </td>
+
+                    </tr>
+
+                  )
+                )}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        )}
+
+      </section>
+
+
+      {/* =====================================
+          INVESTIGATION MODAL
+      ===================================== */}
 
       {selectedTransaction && (
 
@@ -542,10 +1175,13 @@ function App() {
                 </span>
 
                 <h2>
-                  {selectedTransaction.transaction_id}
+                  {
+                    selectedTransaction.transaction_id
+                  }
                 </h2>
 
               </div>
+
 
               <button
                 className="close-button"
@@ -559,6 +1195,8 @@ function App() {
             </div>
 
 
+            {/* RISK SCORE */}
+
             <div className="investigation-decision">
 
               <div className="risk-score-section">
@@ -568,12 +1206,21 @@ function App() {
                 </span>
 
                 <strong>
-                  {selectedTransaction.risk_probability !== null
-                    ? `${(
-                        selectedTransaction.risk_probability * 100
-                      ).toFixed(2)}%`
-                    : "N/A"}
+
+                  {
+                    selectedTransaction.risk_probability !==
+                    null
+
+                      ? `${(
+                          selectedTransaction.risk_probability *
+                          100
+                        ).toFixed(2)}%`
+
+                      : "N/A"
+                  }
+
                 </strong>
+
 
                 <div className="risk-bar">
 
@@ -585,11 +1232,14 @@ function App() {
                     style={{
                       width: `${
                         Math.min(
-                          (selectedTransaction.risk_probability || 0) *
-                          100,
+                          (
+                            selectedTransaction
+                              .risk_probability ||
+                            0
+                          ) * 100,
                           100
                         )
-                      }%`
+                      }%`,
                     }}
                   />
 
@@ -600,23 +1250,34 @@ function App() {
 
               <span
                 className={`badge large ${
-                  selectedTransaction.decision?.toLowerCase()
+                  selectedTransaction.decision
+                    ?.toLowerCase()
                 }`}
               >
-                {selectedTransaction.decision}
+
+                {
+                  selectedTransaction.decision
+                }
+
               </span>
 
             </div>
 
 
+            {/* DETAILS */}
+
             <div className="details-grid">
 
               <div className="detail">
 
-                <span>Customer</span>
+                <span>
+                  Customer
+                </span>
 
                 <strong>
-                  {selectedTransaction.customer_id}
+                  {
+                    selectedTransaction.customer_id
+                  }
                 </strong>
 
               </div>
@@ -624,10 +1285,14 @@ function App() {
 
               <div className="detail">
 
-                <span>Device</span>
+                <span>
+                  Device
+                </span>
 
                 <strong>
-                  {selectedTransaction.device_id}
+                  {
+                    selectedTransaction.device_id
+                  }
                 </strong>
 
               </div>
@@ -635,31 +1300,18 @@ function App() {
 
               <div className="detail">
 
-                <span>Amount</span>
+                <span>
+                  Amount
+                </span>
 
                 <strong>
+
                   ₹
                   {Number(
                     selectedTransaction.amount
-                  ).toLocaleString("en-IN")}
-                </strong>
-
-              </div>
-
-
-              <div className="detail">
-
-                <span>ML Probability</span>
-
-                <strong>
-
-                  {selectedTransaction.ml_probability !==
-                  null
-                    ? `${(
-                        selectedTransaction.ml_probability *
-                        100
-                      ).toFixed(2)}%`
-                    : "N/A"}
+                  ).toLocaleString(
+                    "en-IN"
+                  )}
 
                 </strong>
 
@@ -668,17 +1320,23 @@ function App() {
 
               <div className="detail">
 
-                <span>Velocity Risk</span>
+                <span>
+                  ML Probability
+                </span>
 
                 <strong>
 
-                  {selectedTransaction.velocity_risk !==
-                  null
-                    ? `${(
-                        selectedTransaction.velocity_risk *
-                        100
-                      ).toFixed(2)}%`
-                    : "N/A"}
+                  {
+                    selectedTransaction.ml_probability !==
+                    null
+
+                      ? `${(
+                          selectedTransaction.ml_probability *
+                          100
+                        ).toFixed(2)}%`
+
+                      : "N/A"
+                  }
 
                 </strong>
 
@@ -687,11 +1345,42 @@ function App() {
 
               <div className="detail">
 
-                <span>Risk Level</span>
+                <span>
+                  Velocity Risk
+                </span>
 
                 <strong>
-                  {selectedTransaction.risk_level ||
-                    "N/A"}
+
+                  {
+                    selectedTransaction.velocity_risk !==
+                    null
+
+                      ? `${(
+                          selectedTransaction.velocity_risk *
+                          100
+                        ).toFixed(2)}%`
+
+                      : "N/A"
+                  }
+
+                </strong>
+
+              </div>
+
+
+              <div className="detail">
+
+                <span>
+                  Risk Level
+                </span>
+
+                <strong>
+
+                  {
+                    selectedTransaction.risk_level ||
+                    "N/A"
+                  }
+
                 </strong>
 
               </div>
@@ -699,138 +1388,148 @@ function App() {
             </div>
 
 
+            {/* REAL-TIME SIGNALS */}
+
             <div className="risk-signals">
 
-                  <h3>
-                    Real-Time Risk Signals
-                  </h3>
-
-                  <div className="signal-grid">
-
-                    <div className="signal-card">
-
-                      <span>
-                        Customer / 5 min
-                      </span>
-
-                      <strong>
-                        {
-                          selectedTransaction
-                            .transactions_last_5min
-                        }
-                      </strong>
-
-                      <small>
-                        transactions
-                      </small>
-
-                    </div>
+              <h3>
+                Real-Time Risk Signals
+              </h3>
 
 
-                    <div className="signal-card">
+              <div className="signal-grid">
 
-                      <span>
-                        Customer / 1 hour
-                      </span>
+                <div className="signal-card">
 
-                      <strong>
-                        {
-                          selectedTransaction
-                            .transactions_last_1h
-                        }
-                      </strong>
+                  <span>
+                    Customer / 5 min
+                  </span>
 
-                      <small>
-                        transactions
-                      </small>
+                  <strong>
+                    {
+                      selectedTransaction
+                        .transactions_last_5min
+                    }
+                  </strong>
 
-                    </div>
-
-
-                    <div className="signal-card">
-
-                      <span>
-                        Spending / 1 hour
-                      </span>
-
-                      <strong>
-                        ₹
-                        {Number(
-                          selectedTransaction
-                            .amount_last_1h || 0
-                        ).toLocaleString("en-IN")}
-                      </strong>
-
-                      <small>
-                        recent spending
-                      </small>
-
-                    </div>
-
-
-                    <div className="signal-card">
-
-                      <span>
-                        Device / 5 min
-                      </span>
-
-                      <strong>
-                        {
-                          selectedTransaction
-                            .device_transactions_last_5min
-                        }
-                      </strong>
-
-                      <small>
-                        transactions
-                      </small>
-
-                    </div>
-
-
-                    <div className="signal-card">
-
-                      <span>
-                        Device / 1 hour
-                      </span>
-
-                      <strong>
-                        {
-                          selectedTransaction
-                            .device_transactions_last_1h
-                        }
-                      </strong>
-
-                      <small>
-                        transactions
-                      </small>
-
-                    </div>
-
-
-                    <div className="signal-card">
-
-                      <span>
-                        Device Customers
-                      </span>
-
-                      <strong>
-                        {
-                          selectedTransaction
-                            .unique_customers_last_1h
-                        }
-                      </strong>
-
-                      <small>
-                        unique customers / hour
-                      </small>
-
-                    </div>
-
-                  </div>
+                  <small>
+                    transactions
+                  </small>
 
                 </div>
 
+
+                <div className="signal-card">
+
+                  <span>
+                    Customer / 1 hour
+                  </span>
+
+                  <strong>
+                    {
+                      selectedTransaction
+                        .transactions_last_1h
+                    }
+                  </strong>
+
+                  <small>
+                    transactions
+                  </small>
+
+                </div>
+
+
+                <div className="signal-card">
+
+                  <span>
+                    Spending / 1 hour
+                  </span>
+
+                  <strong>
+
+                    ₹
+                    {Number(
+                      selectedTransaction
+                        .amount_last_1h ||
+                      0
+                    ).toLocaleString(
+                      "en-IN"
+                    )}
+
+                  </strong>
+
+                  <small>
+                    recent spending
+                  </small>
+
+                </div>
+
+
+                <div className="signal-card">
+
+                  <span>
+                    Device / 5 min
+                  </span>
+
+                  <strong>
+                    {
+                      selectedTransaction
+                        .device_transactions_last_5min
+                    }
+                  </strong>
+
+                  <small>
+                    transactions
+                  </small>
+
+                </div>
+
+
+                <div className="signal-card">
+
+                  <span>
+                    Device / 1 hour
+                  </span>
+
+                  <strong>
+                    {
+                      selectedTransaction
+                        .device_transactions_last_1h
+                    }
+                  </strong>
+
+                  <small>
+                    transactions
+                  </small>
+
+                </div>
+
+
+                <div className="signal-card">
+
+                  <span>
+                    Device Customers
+                  </span>
+
+                  <strong>
+                    {
+                      selectedTransaction
+                        .unique_customers_last_1h
+                    }
+                  </strong>
+
+                  <small>
+                    unique customers / hour
+                  </small>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            {/* REASONS */}
 
             <div className="reasons">
 
@@ -839,30 +1538,38 @@ function App() {
               </h3>
 
 
-              {selectedTransaction.risk_reasons?.length >
-              0 ? (
+              {
+                selectedTransaction.risk_reasons
+                  ?.length > 0
 
-                <ul>
+                  ? (
 
-                  {selectedTransaction.risk_reasons.map(
-                    (reason, index) => (
+                    <ul>
 
-                      <li key={index}>
-                        {reason}
-                      </li>
+                      {
+                        selectedTransaction.risk_reasons.map(
+                          (reason, index) => (
 
-                    )
-                  )}
+                            <li key={index}>
+                              {reason}
+                            </li>
 
-                </ul>
+                          )
+                        )
+                      }
 
-              ) : (
+                    </ul>
 
-                <p className="no-reasons">
-                  No additional risk factors detected.
-                </p>
+                  )
 
-              )}
+                  : (
+
+                    <p className="no-reasons">
+                      No additional risk factors detected.
+                    </p>
+
+                  )
+              }
 
             </div>
 
@@ -872,6 +1579,10 @@ function App() {
 
       )}
 
+
+      {/* =====================================
+          INVESTIGATION LOADING
+      ===================================== */}
 
       {investigating && (
 
@@ -884,7 +1595,9 @@ function App() {
       )}
 
     </div>
+
   );
+
 }
 
 
