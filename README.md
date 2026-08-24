@@ -44,7 +44,7 @@ Velocity Risk      = 0.3800
                     -------
 Final Risk         = 0.4295
 
-🛡️ Risk Decisions
+🛡️**### Risk Decisions**
 Risk Probability	Risk Level	Decision
 < 0.40	LOW	APPROVE
 0.40 - < 0.70	MEDIUM	REVIEW
