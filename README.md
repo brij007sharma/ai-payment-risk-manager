@@ -178,6 +178,24 @@ Git
 GitHub
 VS Code
 
+# 📸 Screenshots
+
+## Dashboard
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+## Transaction Investigation
+
+![Transaction Investigation](docs/screenshots/investigation.png)
+
+## AI Investigator
+
+![AI Investigator](docs/screenshots/ai-investigator.png)
+
+## Analytics
+
+![Analytics](docs/screenshots/analytics.png)
+
 ## Author
 ### Brij Sharma
 B.Tech Computer Science & Engineering
