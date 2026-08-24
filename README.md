@@ -177,3 +177,8 @@ OpenAI API
 Git
 GitHub
 VS Code
+
+## Author
+### Brij Sharma
+B.Tech Computer Science & Engineering
+Github: https://github.com/brij007sharma
