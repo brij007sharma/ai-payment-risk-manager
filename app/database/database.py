@@ -417,3 +417,253 @@ def get_all_transactions(limit: int = 50):
     finally:
 
         connection.close()
+
+def delete_unassessed_transactions():
+    """
+    Deletes transactions that do not have
+    a corresponding risk assessment.
+
+    Used for cleaning old/incomplete test data.
+    """
+
+    connection = get_connection()
+
+    try:
+
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            DELETE FROM transactions
+            WHERE transaction_id NOT IN (
+                SELECT transaction_id
+                FROM risk_assessments
+            )
+        """)
+
+        deleted_count = cursor.rowcount
+
+        connection.commit()
+
+        return deleted_count
+
+    finally:
+
+        connection.close()
+
+def get_analytics():
+    """
+    Returns aggregated transaction-risk analytics
+    from the database.
+    """
+
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor()
+
+        # =========================================
+        # TOTAL TRANSACTIONS
+        # =========================================
+
+        cursor.execute("""
+            SELECT COUNT(*) AS count
+            FROM transactions
+        """)
+
+        total_transactions = cursor.fetchone()["count"]
+
+        # =========================================
+        # DECISION COUNTS
+        # =========================================
+
+        cursor.execute("""
+            SELECT
+                COALESCE(r.decision, 'UNASSESSED') AS decision,
+                COUNT(*) AS count
+            FROM transactions t
+            LEFT JOIN risk_assessments r
+                ON t.transaction_id = r.transaction_id
+            GROUP BY COALESCE(r.decision, 'UNASSESSED')
+        """)
+
+        decision_rows = cursor.fetchall()
+
+        decisions = {
+            "APPROVE": 0,
+            "REVIEW": 0,
+            "BLOCK": 0,
+            "UNASSESSED": 0
+        }
+
+        for row in decision_rows:
+            decisions[row["decision"]] = row["count"]
+
+        # =========================================
+        # RISK LEVEL COUNTS
+        # =========================================
+
+        cursor.execute("""
+            SELECT
+                COALESCE(r.risk_level, 'UNASSESSED') AS risk_level,
+                COUNT(*) AS count
+            FROM transactions t
+            LEFT JOIN risk_assessments r
+                ON t.transaction_id = r.transaction_id
+            GROUP BY COALESCE(r.risk_level, 'UNASSESSED')
+        """)
+
+        risk_rows = cursor.fetchall()
+
+        risk_distribution = {
+            "LOW": 0,
+            "MEDIUM": 0,
+            "HIGH": 0,
+            "UNASSESSED": 0
+        }
+
+        for row in risk_rows:
+            risk_distribution[row["risk_level"]] = row["count"]
+
+        # =========================================
+        # AVERAGE RISK
+        # =========================================
+
+        cursor.execute("""
+            SELECT
+                COALESCE(
+                    AVG(risk_probability),
+                    0
+                ) AS average_risk
+            FROM risk_assessments
+        """)
+
+        average_risk = cursor.fetchone()["average_risk"]
+
+        # =========================================
+        # HIGH-RISK RATE
+        # =========================================
+
+        cursor.execute("""
+            SELECT
+                COUNT(*) AS count
+            FROM risk_assessments
+            WHERE risk_level = 'HIGH'
+        """)
+
+        high_risk_count = cursor.fetchone()["count"]
+
+        if total_transactions > 0:
+            high_risk_rate = (
+                high_risk_count /
+                total_transactions
+            )
+        else:
+            high_risk_rate = 0.0
+
+        # =========================================
+        # TRANSACTION VOLUME
+        # =========================================
+
+        cursor.execute("""
+            SELECT
+                DATE(timestamp) AS date,
+                COUNT(*) AS count
+            FROM transactions
+            GROUP BY DATE(timestamp)
+            ORDER BY DATE(timestamp) ASC
+        """)
+
+        volume_rows = cursor.fetchall()
+
+        transaction_volume = [
+            {
+                "date": row["date"],
+                "count": row["count"]
+            }
+            for row in volume_rows
+        ]
+
+        # =========================================
+        # RISK TREND
+        # =========================================
+
+        cursor.execute("""
+            SELECT
+                DATE(created_at) AS date,
+                AVG(risk_probability) AS average_risk
+            FROM risk_assessments
+            GROUP BY DATE(created_at)
+            ORDER BY DATE(created_at) ASC
+        """)
+
+        risk_rows = cursor.fetchall()
+
+        risk_trend = [
+            {
+                "date": row["date"],
+                "average_risk": round(
+                    row["average_risk"] or 0,
+                    4
+                )
+            }
+            for row in risk_rows
+        ]
+
+        # =========================================
+        # RETURN ANALYTICS
+        # =========================================
+
+        return {
+            "total_transactions":
+                total_transactions,
+
+            "approved":
+                decisions["APPROVE"],
+
+            "review":
+                decisions["REVIEW"],
+
+            "blocked":
+                decisions["BLOCK"],
+
+            "unassessed":
+                decisions["UNASSESSED"],
+
+            "high_risk":
+                risk_distribution["HIGH"],
+
+            "average_risk":
+                round(
+                    average_risk or 0,
+                    4
+                ),
+
+            "high_risk_rate":
+                round(
+                    high_risk_rate,
+                    4
+                ),
+
+            "risk_distribution":
+                risk_distribution,
+
+            "decision_distribution": {
+                "APPROVE":
+                    decisions["APPROVE"],
+
+                "REVIEW":
+                    decisions["REVIEW"],
+
+                "BLOCK":
+                    decisions["BLOCK"]
+            },
+
+            "transaction_volume":
+                transaction_volume,
+
+            "risk_trend":
+                risk_trend
+        }
+
+    finally:
+        connection.close()

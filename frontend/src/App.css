@@ -1,3 +1,7 @@
+/* =====================================================
+   GLOBAL
+===================================================== */
+
 * {
   box-sizing: border-box;
 }
@@ -7,7 +11,6 @@ body {
 
   font-family:
     Inter,
-    system-ui,
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
@@ -15,87 +18,107 @@ body {
 
   background: #f5f7fb;
 
-  color: #172033;
+  color: #101828;
 }
 
 button,
 input,
 select {
-  font-family: inherit;
+  font: inherit;
 }
 
 button {
   cursor: pointer;
 }
 
+
+/* =====================================================
+   APP
+===================================================== */
+
 .app {
   min-height: 100vh;
+
+  background: #f5f7fb;
 }
 
 
-/* =========================================
+/* =====================================================
    HEADER
-========================================= */
+===================================================== */
 
 .header {
-  background: #101828;
+  min-height: 96px;
 
-  color: white;
-
-  padding: 28px 5%;
+  padding: 24px 5%;
 
   display: flex;
 
   align-items: center;
 
   justify-content: space-between;
+
+  gap: 20px;
+
+  background: #101828;
+
+  color: white;
 }
 
 .header h1 {
   margin: 0;
 
   font-size: 26px;
+
   font-weight: 800;
 
-  background: linear-gradient(
-    90deg,
-    #22d3ee,
-    #38bdf8,
-    #6366f1
-  );
+  background:
+    linear-gradient(
+      90deg,
+      #22d3ee,
+      #38bdf8,
+      #6366f1
+    );
 
   -webkit-background-clip: text;
+
   -webkit-text-fill-color: transparent;
 
   background-clip: text;
 }
 
 .header p {
-  margin: 10px 0 0;
+  margin: 7px 0 0;
 
   color: #cbd5e1;
 
   font-size: 14px;
 }
-.status {
+
+.status-badge {
   display: flex;
 
   align-items: center;
 
-  gap: 9px;
+  gap: 8px;
 
-  padding: 10px 15px;
+  padding: 8px 12px;
 
   border: 1px solid #344054;
 
-  border-radius: 30px;
+  border-radius: 999px;
 
-  font-size: 14px;
+  color: #d1fadf;
+
+  font-size: 12px;
+
+  white-space: nowrap;
 }
 
 .status-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+
+  height: 8px;
 
   border-radius: 50%;
 
@@ -103,34 +126,268 @@ button {
 }
 
 
-/* =========================================
-   CONTAINERS
-========================================= */
+/* =====================================================
+   MAIN
+===================================================== */
 
-.stats-grid,
-.analytics-grid,
-.transactions-panel,
-.error {
+.main-container {
   width: 90%;
 
   max-width: 1450px;
 
-  margin-left: auto;
-  margin-right: auto;
+  margin: 30px auto 60px;
 }
 
-.stats-grid {
-  margin-top: 25px;
+
+/* =====================================================
+   PANELS
+===================================================== */
+
+.panel {
+  margin-bottom: 28px;
+
+  padding: 24px;
+
+  border: 1px solid #eaecf0;
+
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 8px rgba(
+      16,
+      24,
+      40,
+      0.04
+    );
 }
 
-.analytics-grid {
+.panel-header {
+  margin-bottom: 22px;
+}
+
+.panel-header h2,
+.section-heading h2 {
+  margin: 5px 0;
+
+  font-size: 21px;
+}
+
+.panel-header p,
+.section-heading p {
+  margin: 6px 0 0;
+
+  color: #667085;
+
+  font-size: 13px;
+}
+
+.eyebrow {
+  display: block;
+
+  color: #4f46e5;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+
+  text-transform: uppercase;
+}
+
+
+/* =====================================================
+   FORM
+===================================================== */
+
+.transaction-form {
+  width: 100%;
+}
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.form-group label {
+  color: #344054;
+
+  font-size: 12px;
+
+  font-weight: 600;
+}
+
+.form-group input,
+.filters input,
+.filters select,
+.form-group select {
+  width: 100%;
+
+  padding: 10px 11px;
+
+  border: 1px solid #d0d5dd;
+
+  border-radius: 8px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #101828;
+
+  font-size: 13px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.form-group input:focus,
+.filters input:focus,
+.filters select:focus {
+  border-color: #6366f1;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(
+      99,
+      102,
+      241,
+      0.1
+    );
+}
+
+.checkbox-row {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 22px;
+
   margin-top: 20px;
 }
 
+.checkbox-label {
+  display: flex;
 
-/* =========================================
-   KPI
-========================================= */
+  align-items: center;
+
+  gap: 7px;
+
+  color: #475467;
+
+  font-size: 13px;
+}
+
+.checkbox-label input {
+  width: 15px;
+
+  height: 15px;
+}
+
+.form-actions {
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+  margin-top: 22px;
+}
+
+.primary-button {
+  padding: 11px 18px;
+
+  border: 0;
+
+  border-radius: 8px;
+
+  background: #4f46e5;
+
+  color: white;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  transition: 0.2s ease;
+}
+
+.primary-button:hover {
+  transform: translateY(-1px);
+
+  opacity: 0.93;
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  padding: 9px 14px;
+
+  border: 1px solid #d0d5dd;
+
+  border-radius: 8px;
+
+  background: white;
+
+  color: #344054;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+.secondary-button:hover {
+  background: #f9fafb;
+}
+
+.submit-message {
+  color: #475467;
+
+  font-size: 13px;
+}
+
+
+/* =====================================================
+   ANALYTICS SECTION
+===================================================== */
+
+.analytics-section {
+  margin-bottom: 28px;
+}
+
+.section-heading {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  margin-bottom: 18px;
+}
+
+
+/* =====================================================
+   STAT CARDS
+===================================================== */
 
 .stats-grid {
   display: grid;
@@ -138,20 +395,39 @@ button {
   grid-template-columns:
     repeat(6, 1fr);
 
-  gap: 16px;
+  gap: 14px;
+
+  margin-bottom: 20px;
 }
 
 .stat-card {
-  background: white;
+  min-height: 105px;
+
+  padding: 17px;
 
   border: 1px solid #eaecf0;
 
   border-radius: 12px;
 
-  padding: 20px;
+  background: #ffffff;
 
   box-shadow:
-    0 2px 6px rgba(16, 24, 40, 0.04);
+    0 2px 6px rgba(
+      16,
+      24,
+      40,
+      0.03
+    );
+}
+
+.stat-card span {
+  display: block;
+
+  color: #667085;
+
+  font-size: 12px;
+
+  font-weight: 500;
 }
 
 .stat-card strong {
@@ -159,254 +435,101 @@ button {
 
   margin-top: 10px;
 
-  font-size: 27px;
+  color: #101828;
+
+  font-size: 26px;
+
+  font-weight: 750;
 }
 
-.stat-label {
-  color: #667085;
-
-  font-size: 13px;
+.stat-card .approved-value {
+  color: #067647;
 }
 
-.stat-card.approved strong {
-  color: #079455;
+.stat-card .review-value {
+  color: #b54708;
 }
 
-.stat-card.review strong {
-  color: #dc6803;
-}
-
-.stat-card.blocked strong {
-  color: #d92d20;
-}
-
-.stat-card.high-risk strong {
-  color: #d92d20;
+.stat-card .blocked-value {
+  color: #b42318;
 }
 
 
-/* =========================================
-   PANELS
-========================================= */
-
-.panel {
-  background: white;
-
-  border: 1px solid #eaecf0;
-
-  border-radius: 12px;
-
-  overflow: hidden;
-
-  box-shadow:
-    0 2px 6px rgba(16, 24, 40, 0.04);
-}
+/* =====================================================
+   ANALYTICS CARDS
+===================================================== */
 
 .analytics-grid {
   display: grid;
 
   grid-template-columns:
-    1fr 1fr 1.2fr;
+    1fr 1fr;
 
   gap: 20px;
+
+  margin-top: 20px;
 }
 
-.panel-header {
+.analytics-card {
   padding: 20px;
 
-  display: flex;
+  border: 1px solid #eaecf0;
 
-  align-items: center;
+  border-radius: 14px;
 
-  justify-content: space-between;
+  background: #ffffff;
 
-  border-bottom: 1px solid #eaecf0;
+  box-shadow:
+    0 2px 8px rgba(
+      16,
+      24,
+      40,
+      0.03
+    );
 }
 
-.panel-header h2 {
-  margin: 0;
+.analytics-wide {
+  margin-top: 20px;
+}
+
+.analytics-card-header {
+  margin-bottom: 5px;
+}
+
+.analytics-card-header h3 {
+  margin: 5px 0 0;
+
+  color: #101828;
 
   font-size: 17px;
 }
 
-.panel-header p {
-  margin: 5px 0 0;
+.chart-container {
+  width: 100%;
 
-  color: #667085;
-
-  font-size: 13px;
+  min-height: 280px;
 }
 
+.empty-chart {
+  min-height: 280px;
 
-/* =========================================
-   CHARTS
-========================================= */
-
-.chart {
-  height: 260px;
-
-  padding: 10px;
-}
-
-.bar-chart {
-  height: 290px;
-
-  padding: 15px;
-}
-
-.legend {
   display: flex;
+
+  align-items: center;
 
   justify-content: center;
 
-  gap: 18px;
-
-  padding: 0 20px 20px;
-
-  font-size: 13px;
-
-  color: #667085;
-}
-
-.legend div {
-  display: flex;
-
-  align-items: center;
-
-  gap: 6px;
-}
-
-.legend-dot {
-  width: 8px;
-  height: 8px;
-
-  border-radius: 50%;
-}
-
-.approved-dot {
-  background: #12b76a;
-}
-
-.review-dot {
-  background: #f79009;
-}
-
-.blocked-dot {
-  background: #f04438;
-}
-
-
-/* =========================================
-   HIGH RISK LIST
-========================================= */
-
-.high-risk-list {
-  padding: 8px 0;
-}
-
-.high-risk-item {
-  display: grid;
-
-  grid-template-columns:
-    1fr auto auto;
-
-  align-items: center;
-
-  gap: 15px;
-
-  padding: 14px 18px;
-
-  border-bottom: 1px solid #f2f4f7;
-}
-
-.high-risk-item:last-child {
-  border-bottom: 0;
-}
-
-.high-risk-item > div:first-child strong {
-  display: block;
-
-  font-size: 14px;
-}
-
-.high-risk-item > div:first-child span {
-  display: block;
-
-  margin-top: 3px;
-
-  color: #667085;
-
-  font-size: 12px;
-}
-
-.high-risk-score {
-  text-align: right;
-}
-
-.high-risk-score strong {
-  display: block;
-
-  color: #d92d20;
-
-  font-size: 14px;
-}
-
-.high-risk-score .badge {
-  margin-top: 4px;
-}
-
-.empty-small {
-  padding: 30px;
-
-  text-align: center;
-
-  color: #667085;
+  color: #98a2b3;
 
   font-size: 13px;
 }
 
 
-/* =========================================
-   BUTTONS
-========================================= */
+/* =====================================================
+   FILTERS
+===================================================== */
 
-.refresh-button,
-.investigate-button {
-  border: 1px solid #d0d5dd;
-
-  background: white;
-
-  color: #101828;
-
-  border-radius: 7px;
-
-  padding: 8px 12px;
-
-  font-size: 13px;
-}
-
-.refresh-button:hover,
-.investigate-button:hover {
-  background: #f9fafb;
-}
-
-
-/* =========================================
-   TRANSACTIONS
-========================================= */
-
-.transactions-panel {
-  margin-top: 20px;
-
-  margin-bottom: 30px;
-}
-
-
-/* =========================================
-   FILTER BAR
-========================================= */
-
-.filter-bar {
+.filters {
   display: grid;
 
   grid-template-columns:
@@ -414,95 +537,90 @@ button {
 
   gap: 10px;
 
-  padding: 16px 18px;
-
-  background: #f9fafb;
-
-  border-bottom: 1px solid #eaecf0;
+  margin-bottom: 18px;
 }
 
-.filter-bar input,
-.filter-bar select {
+.search-input {
+  min-width: 0;
+}
+
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.table-wrapper {
   width: 100%;
 
-  height: 40px;
-
-  padding: 0 12px;
-
-  border: 1px solid #d0d5dd;
-
-  border-radius: 7px;
-
-  background: white;
-
-  color: #344054;
-
-  outline: none;
-}
-
-.filter-bar input:focus,
-.filter-bar select:focus {
-  border-color: #98a2b3;
-
-  box-shadow:
-    0 0 0 3px rgba(152, 162, 179, 0.15);
-}
-
-.results-count {
-  padding: 12px 18px;
-
-  color: #667085;
-
-  font-size: 13px;
-}
-
-
-/* =========================================
-   TABLE
-========================================= */
-
-.table-container {
   overflow-x: auto;
+
+  border: 1px solid #eaecf0;
+
+  border-radius: 10px;
 }
 
 table {
   width: 100%;
 
   border-collapse: collapse;
+
+  min-width: 900px;
+}
+
+thead {
+  background: #f9fafb;
 }
 
 th {
-  text-align: left;
+  padding: 12px 14px;
 
-  padding: 13px 18px;
-
-  background: #f9fafb;
+  border-bottom: 1px solid #eaecf0;
 
   color: #667085;
 
   font-size: 11px;
 
+  font-weight: 700;
+
+  text-align: left;
+
   text-transform: uppercase;
 
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
 td {
-  padding: 15px 18px;
+  padding: 13px 14px;
 
-  border-top: 1px solid #eaecf0;
+  border-bottom: 1px solid #f2f4f7;
 
-  font-size: 14px;
+  color: #475467;
+
+  font-size: 13px;
 }
 
-.transaction-id {
-  font-weight: 600;
+tbody tr:hover {
+  background: #fafbff;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+td strong {
+  color: #101828;
+}
+
+.risk-number {
+  color: #344054;
+
+  font-weight: 650;
 }
 
 
-/* =========================================
+/* =====================================================
    BADGES
-========================================= */
+===================================================== */
 
 .badge {
   display: inline-flex;
@@ -511,84 +629,133 @@ td {
 
   padding: 5px 9px;
 
-  border-radius: 20px;
+  border-radius: 999px;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+.badge.low {
+  background: #ecfdf3;
+
+  color: #067647;
+}
+
+.badge.medium {
+  background: #fffaeb;
+
+  color: #b54708;
+}
+
+.badge.high {
+  background: #fef3f2;
+
+  color: #b42318;
+}
+
+.badge.unassessed {
+  background: #f2f4f7;
+
+  color: #667085;
+}
+
+.badge.decision-approve {
+  background: #ecfdf3;
+
+  color: #067647;
+}
+
+.badge.decision-review {
+  background: #fffaeb;
+
+  color: #b54708;
+}
+
+.badge.decision-block {
+  background: #fef3f2;
+
+  color: #b42318;
+}
+
+.badge.decision-unassessed {
+  background: #f2f4f7;
+
+  color: #667085;
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.small-button {
+  padding: 7px 11px;
+
+  border: 1px solid #d0d5dd;
+
+  border-radius: 7px;
+
+  background: white;
+
+  color: #344054;
 
   font-size: 12px;
 
   font-weight: 600;
 }
 
-.badge.approve {
-  background: #ecfdf3;
+.small-button:hover {
+  background: #f9fafb;
 
-  color: #027a48;
+  border-color: #98a2b3;
 }
 
-.badge.review {
-  background: #fffaeb;
 
-  color: #b54708;
+/* =====================================================
+   TABLE STATES
+===================================================== */
+
+.table-state {
+  padding: 45px 20px;
+
+  text-align: center;
+
+  color: #667085;
+
+  font-size: 13px;
 }
 
-.badge.block {
-  background: #fef3f2;
-
+.error-state,
+.error-message {
   color: #b42318;
 }
 
-.badge.large {
-  padding: 8px 14px;
+.error-message {
+  margin-bottom: 15px;
 
-  font-size: 14px;
-}
+  padding: 12px;
 
+  border: 1px solid #fecdca;
 
-/* =========================================
-   RISK LEVEL
-========================================= */
+  border-radius: 8px;
 
-.risk-level {
-  display: inline-flex;
-
-  padding: 5px 9px;
-
-  border-radius: 20px;
-
-  font-size: 11px;
-
-  font-weight: 600;
-}
-
-.risk-level.low {
-  background: #ecfdf3;
-
-  color: #027a48;
-}
-
-.risk-level.medium {
-  background: #fffaeb;
-
-  color: #b54708;
-}
-
-.risk-level.high {
   background: #fef3f2;
 
-  color: #b42318;
+  font-size: 13px;
 }
 
 
-/* =========================================
-   INVESTIGATION MODAL
-========================================= */
+/* =====================================================
+   MODAL
+===================================================== */
 
 .modal-overlay {
   position: fixed;
 
   inset: 0;
 
-  background:
-    rgba(16, 24, 40, 0.55);
+  z-index: 1000;
 
   display: flex;
 
@@ -596,410 +763,219 @@ td {
 
   justify-content: center;
 
-  padding: 20px;
+  padding: 25px;
 
-  z-index: 10;
+  background:
+    rgba(
+      16,
+      24,
+      40,
+      0.62
+    );
+
+  overflow-y: auto;
 }
 
-.investigation {
+.modal {
   width: 100%;
 
-  max-width: 850px;
+  max-width: 1050px;
 
-  max-height: 90vh;
+  max-height: 92vh;
 
   overflow-y: auto;
 
-  background: white;
+  border-radius: 16px;
 
-  border-radius: 15px;
+  background: #ffffff;
 
   box-shadow:
-    0 20px 60px
-    rgba(16, 24, 40, 0.25);
+    0 24px 70px
+    rgba(
+      16,
+      24,
+      40,
+      0.25
+    );
 }
 
-.investigation-header {
-  padding: 24px;
-
+.modal-header {
   display: flex;
 
+  align-items: flex-start;
+
   justify-content: space-between;
+
+  padding: 24px;
 
   border-bottom: 1px solid #eaecf0;
 }
 
-.investigation-header h2 {
-  margin: 5px 0 0;
+.modal-header h2 {
+  margin: 6px 0 0;
 
-  font-size: 24px;
-}
-
-.eyebrow {
-  color: #667085;
-
-  font-size: 12px;
-
-  text-transform: uppercase;
-
-  letter-spacing: 0.06em;
+  font-size: 20px;
 }
 
 .close-button {
-  width: 35px;
-  height: 35px;
+  width: 34px;
+
+  height: 34px;
 
   border: 0;
 
+  border-radius: 7px;
+
   background: #f2f4f7;
 
-  border-radius: 50%;
+  color: #475467;
 
   font-size: 22px;
+
+  line-height: 1;
 }
 
-
-/* =========================================
-   RISK SCORE
-========================================= */
-
-.investigation-decision {
-  padding: 22px 24px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  background: #f9fafb;
-}
-
-.risk-score-section {
-  width: 330px;
-}
-
-.risk-score-section > span {
-  display: block;
-
-  color: #667085;
-
-  font-size: 13px;
-}
-
-.risk-score-section > strong {
-  display: block;
-
-  margin-top: 4px;
-
-  font-size: 32px;
-}
-
-.risk-bar {
-  width: 100%;
-
-  height: 8px;
-
-  margin-top: 12px;
-
+.close-button:hover {
   background: #eaecf0;
-
-  border-radius: 10px;
-
-  overflow: hidden;
-}
-
-.risk-bar-fill {
-  height: 100%;
-
-  border-radius: 10px;
-
-  transition: width 0.5s ease;
-}
-
-.risk-bar-fill.low {
-  background: #12b76a;
-}
-
-.risk-bar-fill.medium {
-  background: #f79009;
-}
-
-.risk-bar-fill.high {
-  background: #f04438;
 }
 
 
-/* =========================================
-   DETAILS
-========================================= */
+/* =====================================================
+   INVESTIGATION SUMMARY
+===================================================== */
 
-.details-grid {
+.investigation-summary {
   display: grid;
 
   grid-template-columns:
     repeat(3, 1fr);
 
-  gap: 15px;
+  gap: 14px;
 
-  padding: 24px;
+  padding: 20px 24px;
 }
 
-.detail {
-  padding: 15px;
+.summary-card {
+  padding: 16px;
 
   border: 1px solid #eaecf0;
 
-  border-radius: 9px;
+  border-radius: 10px;
+
+  background: #f9fafb;
 }
 
-.detail span {
+.summary-card span {
   display: block;
 
   color: #667085;
 
-  font-size: 12px;
+  font-size: 11px;
+
+  text-transform: uppercase;
 }
 
-.detail strong {
+.summary-card strong {
   display: block;
 
   margin-top: 6px;
 
-  font-size: 15px;
+  color: #101828;
+
+  font-size: 18px;
 }
 
 
-/* =========================================
-   REAL-TIME SIGNALS
-========================================= */
+/* =====================================================
+   DETAIL GRID
+===================================================== */
 
-.risk-signals,
-.reasons {
-  padding: 0 24px 24px;
-}
-
-.risk-signals h3,
-.reasons h3 {
-  font-size: 15px;
-}
-
-.signal-grid {
+.detail-grid {
   display: grid;
 
   grid-template-columns:
-    repeat(3, 1fr);
+    repeat(4, 1fr);
 
   gap: 12px;
+
+  padding: 0 24px 20px;
 }
 
-.signal-card {
-  background: #f9fafb;
+.detail-grid > div {
+  padding: 13px;
 
   border: 1px solid #eaecf0;
 
-  padding: 16px;
-
-  border-radius: 9px;
+  border-radius: 8px;
 }
 
-.signal-card span {
+.detail-grid span {
   display: block;
 
   color: #667085;
 
-  font-size: 12px;
-}
-
-.signal-card strong {
-  display: block;
-
-  margin-top: 8px;
-
-  font-size: 21px;
-}
-
-.signal-card small {
-  display: block;
-
-  margin-top: 4px;
-
-  color: #98a2b3;
-
   font-size: 11px;
 }
 
+.detail-grid strong {
+  display: block;
 
-/* =========================================
-   REASONS
-========================================= */
+  margin-top: 5px;
 
-.reasons ul {
+  color: #344054;
+
+  font-size: 13px;
+}
+
+
+/* =====================================================
+   RISK REASONS
+===================================================== */
+
+.reasons-section {
+  margin: 0 24px 20px;
+
+  padding: 18px;
+
+  border: 1px solid #eaecf0;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+}
+
+.reasons-section h3 {
+  margin: 0 0 12px;
+
+  font-size: 15px;
+}
+
+.risk-reasons {
   margin: 0;
 
   padding-left: 20px;
 }
 
-.reasons li {
-  margin: 8px 0;
+.risk-reasons li {
+  margin-bottom: 7px;
 
-  color: #344054;
-
-  font-size: 14px;
-}
-
-.no-reasons {
-  color: #667085;
-
-  font-size: 14px;
-}
-
-
-/* =========================================
-   LOADING
-========================================= */
-
-.loading,
-.empty {
-  padding: 50px;
-
-  text-align: center;
-
-  color: #667085;
-}
-
-.loading-overlay {
-  position: fixed;
-
-  right: 25px;
-
-  bottom: 25px;
-
-  padding: 12px 18px;
-
-  background: #101828;
-
-  color: white;
-
-  border-radius: 8px;
+  color: #475467;
 
   font-size: 13px;
+}
 
-  z-index: 20;
+.muted {
+  margin: 0;
+
+  color: #98a2b3;
+
+  font-size: 13px;
 }
 
 
-/* =========================================
-   ERROR
-========================================= */
-
-.error {
-  margin-top: 20px;
-
-  padding: 12px 15px;
-
-  border-radius: 8px;
-
-  background: #fef3f2;
-
-  color: #b42318;
-
-  display: flex;
-
-  justify-content: space-between;
-}
-
-.error button {
-  border: 1px solid #fda29b;
-
-  background: white;
-
-  border-radius: 6px;
-
-  padding: 5px 10px;
-}
-
-
-/* =========================================
-   RESPONSIVE
-========================================= */
-
-@media (max-width: 1200px) {
-
-  .stats-grid {
-    grid-template-columns:
-      repeat(3, 1fr);
-  }
-
-  .analytics-grid {
-    grid-template-columns:
-      1fr 1fr;
-  }
-
-  .high-risk-panel {
-    grid-column: span 2;
-  }
-
-}
-
-
-@media (max-width: 800px) {
-
-  .header {
-    align-items: flex-start;
-
-    flex-direction: column;
-
-    gap: 15px;
-  }
-
-  .stats-grid {
-    grid-template-columns:
-      repeat(2, 1fr);
-  }
-
-  .analytics-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .high-risk-panel {
-    grid-column: auto;
-  }
-
-  .filter-bar {
-    grid-template-columns: 1fr;
-  }
-
-  .details-grid,
-  .signal-grid {
-    grid-template-columns: 1fr;
-  }
-
-}
-
-
-@media (max-width: 500px) {
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .header {
-    padding: 22px;
-  }
-
-  .stats-grid,
-  .analytics-grid,
-  .transactions-panel,
-  .error {
-    width: 94%;
-  }
-
-}
-
-/* =========================================
+/* =====================================================
    AI INVESTIGATOR
-========================================= */
+===================================================== */
 
 .ai-investigator {
   margin: 0 24px 24px;
@@ -1008,7 +984,7 @@ td {
 
   border: 1px solid #dbe4ff;
 
-  border-radius: 12px;
+  border-radius: 14px;
 
   background:
     linear-gradient(
@@ -1023,19 +999,23 @@ td {
 
   justify-content: space-between;
 
-  align-items: center;
+  align-items: flex-start;
 
   gap: 20px;
+
+  padding-bottom: 18px;
+
+  border-bottom: 1px solid #eaecf0;
 }
 
 .ai-investigator-header h3 {
-  margin: 5px 0;
+  margin: 6px 0;
 
-  font-size: 17px;
+  font-size: 18px;
 }
 
 .ai-investigator-header p {
-  margin: 0;
+  margin: 6px 0 0;
 
   color: #667085;
 
@@ -1043,9 +1023,9 @@ td {
 }
 
 .ai-button {
-  border: 0;
-
   padding: 10px 16px;
+
+  border: 0;
 
   border-radius: 8px;
 
@@ -1053,7 +1033,11 @@ td {
 
   color: white;
 
-  font-weight: 600;
+  font-size: 12px;
+
+  font-weight: 650;
+
+  white-space: nowrap;
 
   transition: 0.2s ease;
 }
@@ -1068,60 +1052,62 @@ td {
   opacity: 0.6;
 
   cursor: not-allowed;
+
+  transform: none;
 }
-
-
-/* AI RESULT */
 
 .ai-result {
   margin-top: 20px;
+}
 
-  border-top: 1px solid #eaecf0;
-
-  padding-top: 20px;
+.ai-summary {
+  margin-bottom: 18px;
 }
 
 .ai-summary span,
 .ai-primary-risk span {
   display: block;
 
+  margin-bottom: 7px;
+
   color: #667085;
 
-  font-size: 12px;
+  font-size: 11px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.05em;
 
   text-transform: uppercase;
-
-  letter-spacing: 0.04em;
 }
 
 .ai-summary p {
-  margin: 8px 0 20px;
+  margin: 0;
+
+  color: #344054;
+
+  font-size: 13px;
 
   line-height: 1.6;
-
-  font-size: 14px;
 }
 
 .ai-primary-risk {
-  padding: 14px;
-
-  border-radius: 8px;
-
-  background: #f9fafb;
+  padding: 15px;
 
   border: 1px solid #eaecf0;
+
+  border-radius: 9px;
+
+  background: #f9fafb;
 }
 
 .ai-primary-risk strong {
-  display: block;
-
-  margin-top: 6px;
+  color: #101828;
 
   font-size: 14px;
+
+  line-height: 1.5;
 }
-
-
-/* AI COLUMNS */
 
 .ai-columns {
   display: grid;
@@ -1129,15 +1115,25 @@ td {
   grid-template-columns:
     1fr 1fr;
 
-  gap: 25px;
+  gap: 18px;
 
-  margin-top: 20px;
+  margin-top: 18px;
+}
+
+.ai-columns > div {
+  padding: 16px;
+
+  border: 1px solid #eaecf0;
+
+  border-radius: 9px;
+
+  background: white;
 }
 
 .ai-columns h4 {
-  margin: 0 0 10px;
+  margin: 0 0 11px;
 
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .ai-columns ul {
@@ -1149,15 +1145,12 @@ td {
 .ai-columns li {
   margin-bottom: 7px;
 
-  color: #344054;
+  color: #475467;
 
-  font-size: 13px;
+  font-size: 12px;
 
-  line-height: 1.4;
+  line-height: 1.45;
 }
-
-
-/* AI FOOTER */
 
 .ai-footer {
   display: grid;
@@ -1165,17 +1158,19 @@ td {
   grid-template-columns:
     1fr 1fr;
 
-  gap: 12px;
+  gap: 14px;
 
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .ai-footer > div {
-  padding: 12px;
+  padding: 13px;
 
   border: 1px solid #eaecf0;
 
-  border-radius: 8px;
+  border-radius: 9px;
+
+  background: #fafafa;
 }
 
 .ai-footer span {
@@ -1183,7 +1178,9 @@ td {
 
   color: #667085;
 
-  font-size: 11px;
+  font-size: 10px;
+
+  text-transform: uppercase;
 }
 
 .ai-footer strong {
@@ -1191,26 +1188,27 @@ td {
 
   margin-top: 5px;
 
+  color: #101828;
+
   font-size: 14px;
 }
 
-
-/* ANALYST NOTE */
-
 .analyst-note {
-  margin-top: 15px;
+  margin-top: 16px;
 
   padding: 14px;
 
-  background: #fffaeb;
-
   border: 1px solid #fedf89;
 
-  border-radius: 8px;
+  border-radius: 9px;
+
+  background: #fffaeb;
 }
 
 .analyst-note strong {
-  font-size: 13px;
+  color: #344054;
+
+  font-size: 12px;
 }
 
 .analyst-note p {
@@ -1218,45 +1216,144 @@ td {
 
   color: #475467;
 
-  font-size: 13px;
+  font-size: 12px;
 
-  line-height: 1.5;
+  line-height: 1.55;
 }
-
-
-/* ERROR */
 
 .ai-error {
   margin-top: 15px;
 
-  padding: 10px;
+  padding: 10px 12px;
 
-  border-radius: 7px;
+  border: 1px solid #fecdca;
+
+  border-radius: 8px;
 
   background: #fef3f2;
 
   color: #b42318;
 
-  font-size: 13px;
+  font-size: 12px;
 }
 
 
-/* RESPONSIVE */
+/* =====================================================
+   RESPONSIVE
+===================================================== */
 
-@media (max-width: 700px) {
+@media (max-width: 1150px) {
+
+  .form-grid {
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+  .detail-grid {
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+}
+
+
+@media (max-width: 850px) {
+
+  .header {
+    padding: 20px 5%;
+  }
+
+  .header {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .form-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filters {
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+  .detail-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .main-container {
+    width: 94%;
+
+    margin-top: 18px;
+  }
+
+  .panel {
+    padding: 17px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .investigation-summary {
+    grid-template-columns: 1fr;
+
+    padding: 16px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+
+    padding: 0 16px 16px;
+  }
+
+  .ai-investigator {
+    margin: 0 16px 16px;
+
+    padding: 16px;
+  }
 
   .ai-investigator-header {
     flex-direction: column;
-
-    align-items: flex-start;
   }
 
-  .ai-columns {
-    grid-template-columns: 1fr;
-  }
-
+  .ai-columns,
   .ai-footer {
     grid-template-columns: 1fr;
+  }
+
+  .modal-overlay {
+    padding: 10px;
+  }
+
+  .modal-header {
+    padding: 17px;
   }
 
 }

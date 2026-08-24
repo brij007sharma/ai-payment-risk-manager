@@ -14,6 +14,7 @@ from app.services.feature_service import FeatureService
 from app.database.database import (
     initialize_database,
     save_transaction,
+    get_analytics,
     save_risk_assessment,
     get_transaction,
     get_all_transactions
@@ -48,6 +49,11 @@ feature_service = FeatureService()
 def startup():
 
     initialize_database()
+
+@app.get("/analytics")
+def analytics():
+
+    return get_analytics()
 
 
 @app.get("/")
